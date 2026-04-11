@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartWare — Inventory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .inv-cell { position: relative; transition: all 0.2s ease; cursor: pointer; }
+    .inv-cell:hover { background: rgba(255,255,255,0.06) !important; outline: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10; }
+    .inv-cell:hover::after { content: "✎ Edit"; position: absolute; right: 8px; top: 8px; font-size: .65rem; color: var(--cyan); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-logo">◆ SmartWare</a>
+    <div class="nav-links">
+      <a href="/">Order</a>
+      <a href="/orders">Placed Orders</a>
+      <a href="/warehouses">Warehouses</a>
+      <a href="/inventory" class="active">Inventory</a>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width:1100px">
+    <div class="page-hd">
+      <div><h1>Inventory Status</h1><p class="sub">Real-time stock with 10% safety stock reserve enforcement</p></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="legend">
+          <span class="legend-i"><span class="d d-ok"></span>In Stock</span>
+          <span class="legend-i"><span class="d d-low"></span>Low</span>
+          <span class="legend-i"><span class="d d-crit"></span>Critical</span>
+          <span class="legend-i"><span class="d d-out"></span>Out</span>
+        </div>
+        <div class="filter-box"><input type="text" id="invSearch" placeholder="Filter…" /></div>
+      </div>
+    </div>
+
+    <div class="stats-row" id="invStats"></div>
+
+    <div class="tbl-wrap">
+      <table class="tbl" id="invTbl">
+        <thead>
+          <tr>
+            <th>Warehouse</th>
+            <th>City</th>
+            <th id="h0"></th><th id="h1"></th><th id="h2"></th><th id="h3"></th><th id="h4"></th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="invBody"><tr><td colspan="8" style="text-align:center;padding:32px;color:var(--t3)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    let ALL = null;
+    document.addEventListener("DOMContentLoaded", async () => {
+      ALL = await (await fetch("/api/inventory")).json();
+      ALL.products.forEach((p, i) => {
+        const th = document.getElementById(`h${i}`);
+        if (th) th.innerHTML = `<div class="th-prod">${p.sku}<br><span class="th-pn">${p.name.split(" ").slice(0,2).join(" ")}</span></div>`;
+      });
+      renderInv(ALL.warehouses);
+      document.getElementById("invSearch").addEventListener("input", e => {
+        const q = e.target.value.toLowerCase();
+        renderInv(ALL.warehouses.filter(w => (w.name+w.city+w.state+w.id).toLowerCase().includes(q)));
+      });
+    });
+
+    function renderInv(whs) {
+      const skus = ALL.products.map(p => p.sku);
+      let ok=0,low=0,crit=0,out=0;
+      whs.forEach(w => skus.forEach(s => {
+        const st = w.products[s]?.status;
+        if (st==="ok") ok++; else if (st==="low") low++; else if (st==="critical") crit++; else if (st==="out") out++;
+      }));
+      document.getElementById("invStats").innerHTML = `
+        <div class="stat-chip"><span class="sv gr">${ok}</span><span class="sl">In Stock</span></div>
+        <div class="stat-chip"><span class="sv am">${low}</span><span class="sl">Low</span></div>
+        <div class="stat-chip"><span class="sv rd">${crit}</span><span class="sl">Critical</span></div>
+        <div class="stat-chip"><span class="sv dm">${out}</span><span class="sl">Out</span></div>`;
+
+      document.getElementById("invBody").innerHTML = whs.map(w => {
+        const cells = skus.map(s => {
+          const p = w.products[s];
+          if (!p) return `<td class="inv-cell">—</td>`;
+          return `<td class="inv-cell s-${p.status}" onclick="reqUpdate('${w.id}', '${s}', ${p.on_hand})" title="On hand: ${p.on_hand} | Safety reserve: ${p.safety_reserve} | Available: ${p.available}">
+            <span class="inv-v">${p.on_hand}</span><span class="inv-a">${p.available} avail · ${p.safety_reserve} reserve</span></td>`;
+        }).join("");
+        return `<tr>
+          <td style="display:flex;align-items:center;gap:6px"><span class="id-tag">${w.id}</span><span style="font-weight:600;font-size:.8rem">${w.name}</span></td>
+          <td>${w.city}, ${w.state}</td>${cells}
+          <td class="t-tot">${w.total_stock.toLocaleString()}</td></tr>`;
+      }).join("");
+    }
+
+    async function reqUpdate(whId, sku, currentQty) {
+      const resp = prompt(`Set new inventory quantity for ${sku} at Warehouse ${whId}:`, currentQty);
+      if (resp === null) return;
+      const val = parseInt(resp);
+      if (isNaN(val) || val < 0) { alert("Please enter a valid positive number."); return; }
+      
+      try {
+        await fetch("/api/inventory/update", {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ warehouse_id: whId, sku: sku, qty: val })
+        });
+        window.location.reload();
+      } catch {
+        alert("Failed to update inventory.");
+      }
+    }
+  </script>
+</body>
+</html>

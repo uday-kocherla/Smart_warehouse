@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartWare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-logo">◆ SmartWarehouse</a>
+    <div class="nav-links">
+      <a href="/" class="active">Order</a>
+      <a href="/orders">Placed Orders</a>
+      <a href="/warehouses">Warehouses</a>
+      <a href="/inventory">Inventory</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Step 1: Location -->
+    <section class="step">
+      <span class="step-num">1</span>
+      <h2>Delivery location</h2>
+      <div class="search-wrap" id="searchWrap">
+        <input type="text" id="locInput" placeholder="Search any US city…" autocomplete="off" spellcheck="false" />
+        <div class="dropdown" id="dropdown"></div>
+      </div>
+      <div id="locChip"></div>
+    </section>
+
+    <!-- Step 2: Products -->
+    <section class="step hidden" id="stepProducts">
+      <span class="step-num">2</span>
+      <h2>Select products</h2>
+      <div class="prod-list" id="prodList"></div>
+    </section>
+
+    <!-- Run -->
+    <div class="hidden" id="runWrap">
+      <button class="btn-run" id="btnRun" disabled>
+        <span id="btnText">Get delivery quote →</span>
+        <span class="spinner" id="btnSpinner"></span>
+      </button>
+    </div>
+
+    <!-- Results -->
+    <div class="hidden" id="results">
+      <!-- Pipeline steps -->
+      <section class="pipeline" id="pipeline"></section>
+      <!-- Final shipment -->
+      <section id="shipmentCards"></section>
+      <!-- Action -->
+      <section id="orderActions" class="hidden" style="margin-top:24px;text-align:right">
+        <button class="btn-run" id="btnConfirm"
+          style="background:var(--green);color:#000;border:1px solid rgba(74,222,128,0.3);max-width:320px;margin:0 0 0 auto">
+          <span id="btnConfirmText">Place Order & Deduct Inventory</span>
+          <span class="spinner" id="btnConfirmSpinner"></span>
+        </button>
+      </section>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartWare — Warehouses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-logo">◆ SmartWare</a>
+    <div class="nav-links">
+      <a href="/">Order</a>
+      <a href="/orders">Placed Orders</a>
+      <a href="/warehouses" class="active">Warehouses</a>
+      <a href="/inventory">Inventory</a>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width:1100px">
+    <div class="page-hd">
+      <div><h1>Warehouse Locations</h1><p class="sub">50 distribution centers across the US</p></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="filter-box">
+          <input type="text" id="whSearch" placeholder="Filter…" />
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row" id="stats"></div>
+
+    <div class="tbl-wrap">
+      <table class="tbl" id="whTable">
+        <thead><tr><th>ID</th><th>Name</th><th>City</th><th>State</th><th>Lat</th><th>Lon</th><th>Capacity</th></tr></thead>
+        <tbody id="whBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--t3)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const data = await (await fetch("/api/warehouses")).json();
+      render(data);
+      document.getElementById("whSearch").addEventListener("input", e => {
+        const q = e.target.value.toLowerCase();
+        render(data.filter(w => (w.name+w.city+w.state+w.id).toLowerCase().includes(q)));
+      });
+    });
+
+    function render(data) {
+      document.getElementById("whBody").innerHTML = data.map(w => `
+        <tr><td><span class="id-tag">${w.id}</span></td><td style="font-weight:600">${w.name}</td><td>${w.city}</td><td><span class="st-tag">${w.state}</span></td>
+        <td style="font-family:var(--mono);font-size:.78rem">${w.lat.toFixed(4)}</td><td style="font-family:var(--mono);font-size:.78rem">${w.lon.toFixed(4)}</td>
+        <td style="font-family:var(--mono);color:var(--cyan)">${w.max_capacity.toLocaleString()}</td></tr>`).join("");
+      const states = new Set(data.map(w => w.state));
+      const avg = data.length ? Math.round(data.reduce((s,w) => s+w.max_capacity, 0)/data.length) : 0;
+      document.getElementById("stats").innerHTML = `
+        <div class="stat-chip"><span class="sv">${data.length}</span><span class="sl">Total</span></div>
+        <div class="stat-chip"><span class="sv">${states.size}</span><span class="sl">States</span></div>
+        <div class="stat-chip"><span class="sv">${avg.toLocaleString()}</span><span class="sl">Avg Capacity</span></div>`;
+    }
+  </script>
+</body>
+</html>

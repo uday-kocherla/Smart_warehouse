@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartWare — Placed Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 24px; overflow: hidden; }
+    .order-hd { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+    .order-id { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; color: var(--cyan); }
+    .order-time { font-size: .8rem; color: var(--t3); display: flex; gap: 12px; align-items: center; }
+    .tag-status { padding: 4px 10px; border-radius: 100px; font-size: .7rem; font-weight: 600; background: rgba(74,222,128,.1); color: var(--green); border: 1px solid rgba(74,222,128,.2); }
+    .order-summary { padding: 20px; display: flex; flex-wrap: wrap; gap: 32px; border-bottom: 1px solid var(--border); }
+    .os-stat { display: flex; flex-direction: column; gap: 4px; }
+    .os-lbl { font-size: .65rem; text-transform: uppercase; letter-spacing: .5px; color: var(--t3); font-weight: 600; }
+    .os-val { font-size: 1.1rem; font-weight: 600; }
+    .empty-state { text-align: center; padding: 64px 20px; color: var(--t3); }
+    .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-logo">◆ SmartWare</a>
+    <div class="nav-links">
+      <a href="/">Order</a>
+      <a href="/orders" class="active">Placed Orders</a>
+      <a href="/warehouses">Warehouses</a>
+      <a href="/inventory">Inventory</a>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width:1100px">
+    <div class="page-hd">
+      <div>
+        <h1>Placed Orders History</h1>
+        <p class="sub">View allocated shipments and fulfilled orders</p>
+      </div>
+    </div>
+
+    <div id="ordersWrap">
+      <div class="empty-state">Loading orders...</div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const res = await fetch("/api/orders");
+        const orders = await res.json();
+        
+        const wrap = document.getElementById("ordersWrap");
+        if (!orders || orders.length === 0) {
+          wrap.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📂</div>
+              <h3>No Orders Placed</h3>
+              <p style="margin-top:8px">Generate a quote and confirm an order to see it here.</p>
+              <a href="/" class="btn-run" style="display:inline-block; margin-top:20px; max-width:200px">Create Order</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Render orders newest first
+        wrap.innerHTML = orders.reverse().map(o => {
+          const d = o.details;
+          const req = d.order_summary.items_requested;
+          const totalCost = d.metrics.total_shipping_cost_usd;
+          const itemsCount = req.reduce((acc, curr) => acc + curr.qty, 0);
+
+          return `
+            <div class="order-card" style="animation: fadeIn .4s ease">
+              <div class="order-hd">
+                <div style="display:flex; gap:16px; align-items:center;">
+                  <span class="order-id">${o.order_id}</span>
+                  <span class="tag-status">${o.status}</span>
+                </div>
+                <div class="order-time">${o.timestamp}</div>
+              </div>
+              <div class="order-summary">
+                <div class="os-stat"><span class="os-lbl">Total Cost</span><span class="os-val" style="color:var(--green)">$${totalCost.toFixed(2)}</span></div>
+                <div class="os-stat"><span class="os-lbl">ETA</span><span class="os-val" style="color:var(--amber)">${d.metrics.estimated_arrival_date}</span></div>
+                <div class="os-stat"><span class="os-lbl">Units Ordered</span><span class="os-val">${itemsCount}</span></div>
+                <div class="os-stat"><span class="os-lbl">Shipments Required</span><span class="os-val">${d.shipments.length}</span></div>
+                <div class="os-stat"><span class="os-lbl">Delivery Mode</span><span class="os-val">${d.decision_steps.step3_allocation.mode}</span></div>
+              </div>
+              <div style="padding: 20px;">
+                <h4 style="margin-bottom:12px;font-size:.8rem;color:var(--t2);text-transform:uppercase;letter-spacing:1px">Carrier Assignments</h4>
+                <div class="ship-grid" style="border:none;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px">
+                  ${d.shipments.map((s, i) => `
+                    <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px;padding:12px">
+                      <div style="font-size:.75rem;color:var(--t3);margin-bottom:4px">Shipment ${i+1} — ${s.warehouse.warehouse_name}</div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                        <span style="font-weight:600">${s.chosen_carrier.service_level}</span>
+                        <span style="color:var(--green);font-weight:600">$${s.chosen_carrier.cost_usd.toFixed(2)}</span>
+                      </div>
+                      <div style="font-size:.7rem;color:var(--t3)">Items allocated: ${s.items_allocated.map(it => `${it.qty_allocated}× ${it.sku}`).join(', ')}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        document.getElementById("ordersWrap").innerHTML = `<div class="empty-state">Failed to load orders.</div>`;
+      }
+    });
+  </script>
+</body>
+</html>

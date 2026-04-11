@@ -1,0 +1,192 @@
+{
+  "order_summary": {
+    "customer_location": {
+      "lat": 34.0522,
+      "lon": -118.2437
+    },
+    "items_requested": [
+      {
+        "sku": "SKU-A100",
+        "qty": 400
+      },
+      {
+        "sku": "SKU-B200",
+        "qty": 350
+      },
+      {
+        "sku": "SKU-D400",
+        "qty": 300
+      }
+    ],
+    "total_shipments": 2
+  },
+  "shipments": [
+    {
+      "warehouse": {
+        "warehouse_id": "WH-001",
+        "warehouse_name": "Los Angeles DC",
+        "city": "Los Angeles",
+        "state": "CA",
+        "lat": 33.9425,
+        "lon": -118.4081,
+        "distance_miles": 12.1
+      },
+      "items_allocated": [
+        {
+          "sku": "SKU-A100",
+          "qty_allocated": 52
+        },
+        {
+          "sku": "SKU-B200",
+          "qty_allocated": 11
+        },
+        {
+          "sku": "SKU-D400",
+          "qty_allocated": 126
+        }
+      ],
+      "total_weight_lbs": 345.7,
+      "distance_miles": 12.1,
+      "chosen_carrier": {
+        "carrier": "UPS",
+        "service_level": "UPS Ground",
+        "cost_usd": 275.26,
+        "estimated_delivery_days": 1
+      },
+      "all_carrier_quotes": [
+        {
+          "carrier": "UPS",
+          "service_level": "UPS Ground",
+          "cost_usd": 275.26,
+          "estimated_delivery_days": 1,
+          "composite_score": 169.16
+        },
+        {
+          "carrier": "FedEx",
+          "service_level": "FedEx Ground",
+          "cost_usd": 298.98,
+          "estimated_delivery_days": 1,
+          "composite_score": 183.39
+        },
+        {
+          "carrier": "FedEx",
+          "service_level": "FedEx Express",
+          "cost_usd": 538.16,
+          "estimated_delivery_days": 1,
+          "composite_score": 326.9
+        },
+        {
+          "carrier": "UPS",
+          "service_level": "UPS Next Day Air",
+          "cost_usd": 578.04,
+          "estimated_delivery_days": 1,
+          "composite_score": 350.82
+        }
+      ]
+    },
+    {
+      "warehouse": {
+        "warehouse_id": "WH-007",
+        "warehouse_name": "San Diego Coastal",
+        "city": "San Diego",
+        "state": "CA",
+        "lat": 32.7157,
+        "lon": -117.1611,
+        "distance_miles": 111.5
+      },
+      "items_allocated": [
+        {
+          "sku": "SKU-A100",
+          "qty_allocated": 348
+        },
+        {
+          "sku": "SKU-B200",
+          "qty_allocated": 3
+        },
+        {
+          "sku": "SKU-D400",
+          "qty_allocated": 174
+        }
+      ],
+      "total_weight_lbs": 629.7,
+      "distance_miles": 111.5,
+      "chosen_carrier": {
+        "carrier": "UPS",
+        "service_level": "UPS Ground",
+        "cost_usd": 497.77,
+        "estimated_delivery_days": 1
+      },
+      "all_carrier_quotes": [
+        {
+          "carrier": "UPS",
+          "service_level": "UPS Ground",
+          "cost_usd": 497.77,
+          "estimated_delivery_days": 1,
+          "composite_score": 302.66
+        },
+        {
+          "carrier": "FedEx",
+          "service_level": "FedEx Ground",
+          "cost_usd": 541.57,
+          "estimated_delivery_days": 1,
+          "composite_score": 328.94
+        },
+        {
+          "carrier": "FedEx",
+          "service_level": "FedEx Express",
+          "cost_usd": 974.83,
+          "estimated_delivery_days": 1,
+          "composite_score": 588.9
+        },
+        {
+          "carrier": "UPS",
+          "service_level": "UPS Next Day Air",
+          "cost_usd": 1045.32,
+          "estimated_delivery_days": 1,
+          "composite_score": 631.19
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "total_shipping_cost_usd": 773.03,
+    "estimated_delivery_window": "1 business day(s)",
+    "estimated_arrival_date": "2026-04-12"
+  },
+  "inventory_update": [
+    {
+      "warehouse_id": "WH-001",
+      "items_deducted": [
+        {
+          "sku": "SKU-A100",
+          "qty_allocated": 52
+        },
+        {
+          "sku": "SKU-B200",
+          "qty_allocated": 11
+        },
+        {
+          "sku": "SKU-D400",
+          "qty_allocated": 126
+        }
+      ]
+    },
+    {
+      "warehouse_id": "WH-007",
+      "items_deducted": [
+        {
+          "sku": "SKU-A100",
+          "qty_allocated": 348
+        },
+        {
+          "sku": "SKU-B200",
+          "qty_allocated": 3
+        },
+        {
+          "sku": "SKU-D400",
+          "qty_allocated": 174
+        }
+      ]
+    }
+  ]
+}
