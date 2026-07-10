@@ -99,7 +99,7 @@ def get_inventory():
 @app.route("/api/inventory/update", methods=["POST"])
 def update_inventory():
     """Manually update physical stock level for a given warehouse and SKU."""
-    global warehouses
+    # global warehouses
     body = request.get_json(force=True)
     wh_id = body.get("warehouse_id")
     sku = body.get("sku")
@@ -129,7 +129,7 @@ def get_orders():
 @app.route("/api/fulfill", methods=["POST"])
 def fulfill_order():
     """Run the decision engine."""
-    global warehouses, placed_orders
+    # global warehouses, placed_orders
     body = request.get_json(force=True)
     customer_lat = float(body["customer_lat"])
     customer_lon = float(body["customer_lon"])
